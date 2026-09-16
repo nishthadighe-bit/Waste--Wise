@@ -30,7 +30,7 @@ def init_db():
 
 init_db()
 
-# 2. PyTorch AI Classification Model Setup (Upgraded to ResNet50 for Superior Accuracy)
+# 2. PyTorch AI Classification Model Setup
 @st.cache_resource
 def load_classifier():
     weights = ResNet50_Weights.DEFAULT
@@ -47,37 +47,40 @@ def classify_image(image):
         output = model(img_t)
     probabilities = torch.nn.functional.softmax(output[0], dim=0)
     
-    # Extract Top-5 predictions for broader feature matching
     top_probs, top_catids = torch.topk(probabilities, 5)
     primary_class = weights.meta["categories"][top_catids[0]]
     
-    # Aggregate top confidence scores for solid UI representation
     top_5_sum = sum(top_probs).item() * 100
     display_confidence = min(max(top_5_sum * 2.2, top_probs[0].item() * 100), 96.5)
     
-    # Extensive keyword dictionary mapping ImageNet classes to municipal bins
     class_lower = primary_class.lower()
     
-    plastic_kw = ['bottle', 'bag', 'wrapper', 'plastic', 'pop', 'tub', 'bucket', 'container', 'water_bottle']
-    wet_kw = ['apple', 'banana', 'food', 'fruit', 'vegetable', 'grocery', 'cabbage', 'orange', 'lemon', 'potatoes']
-    metal_kw = ['can', 'iron', 'steel', 'tin', 'wire', 'brass', 'foil', 'chain', 'soda']
-    paper_kw = ['paper', 'carton', 'cardboard', 'envelope', 'packet', 'box', 'paper_towel']
+    # Category Matching Keywords
+    plastic_kw = ['bottle', 'bag', 'wrapper', 'plastic', 'pop', 'tub', 'bucket', 'container', 'water_bottle', 'cup']
+    wet_kw = ['apple', 'banana', 'food', 'fruit', 'vegetable', 'grocery', 'cabbage', 'orange', 'lemon', 'potatoes', 'meat', 'bread']
+    metal_kw = ['can', 'iron', 'steel', 'tin', 'wire', 'brass', 'foil', 'chain', 'soda', 'screw']
+    paper_kw = ['paper', 'carton', 'cardboard', 'envelope', 'packet', 'box', 'paper_towel', 'newspaper']
+    ewaste_kw = ['phone', 'computer', 'mouse', 'keyboard', 'monitor', 'screen', 'ipod', 'cellular', 'modem', 'laptop']
     
+    # Distinct Waste Streams & Custom Disposal Protocols
     if any(k in class_lower for k in plastic_kw):
         cat = "Dry Waste (Plastic)"
-        guide = "Rinse dry, crush, and place in the Blue Bin."
+        guide = "🔵 **Blue Bin:** Rinse clean, crush to save space, and deposit in dry recyclable waste bins."
     elif any(k in class_lower for k in wet_kw):
         cat = "Wet Waste (Organic)"
-        guide = "Compost at home or place in the Green Organic Bin."
+        guide = "🟢 **Green Bin:** Separate from packaging. Ideal for home composting or organic municipal collection."
     elif any(k in class_lower for k in metal_kw):
-        cat = "Metal Waste"
-        guide = "Deliver to local scrap dealer or Dry Bin."
+        cat = "Metal / Scrap Waste"
+        guide = "⚙️ **Grey / Scrap Bin:** Wipe clean of liquids and deliver to municipal scrap recyclers or dry waste units."
     elif any(k in class_lower for k in paper_kw):
-        cat = "Paper / Cardboard"
-        guide = "Bundle flat and keep dry for recycling."
+        cat = "Paper & Cardboard Waste"
+        guide = "📦 **Yellow / Dry Bin:** Flatten cardboard boxes, keep dry from liquids, and bundle together for recycling."
+    elif any(k in class_lower for k in ewaste_kw):
+        cat = "Hazardous / E-Waste"
+        guide = "🔴 **Red E-Waste Hub:** Do NOT toss in standard bins! Take to dedicated electronic drop-off centers."
     else:
-        cat = "General / Specialized Waste"
-        guide = "Check for hazardous or e-waste labels before disposal."
+        cat = "General Mixed Waste"
+        guide = "⚪ **Black / Trash Bin:** Non-recyclable refuse. Ensure no hazardous materials or batteries are mixed inside."
         
     return cat, primary_class, display_confidence, guide
 
@@ -108,7 +111,7 @@ with tab1:
             st.metric("Waste Stream", cat)
             st.write(f"**Detected Item:** {raw_name.replace('_', ' ').capitalize()}")
             st.write(f"**Confidence Score:** {conf:.2f}%")
-            st.info(f"💡 **Disposal Protocol:** {guide}")
+            st.info(f"💡 **Disposal Protocol:**\n\n{guide}")
 
 # TAB 2: GIS MAP
 with tab2:
