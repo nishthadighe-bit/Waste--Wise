@@ -3,7 +3,7 @@
 Waste Wise is a Smart City Web Application that leverages Computer Vision and Deep Learning to automate waste classification, locate nearby recycling hubs, allow public issue reporting, and provide real-time municipal analytics.
 
 ## 🚀 Live Demo
-- **URL:** [https://waste-wise.streamlit.app](https://waste-wise.streamlit.app) *(Replace with your actual live link)*
+- **URL:** https://waste-wise-eksmsuchjfckkgzhdmszvp.streamlit.app/
 
 ## ✨ Key Features
 - **📸 AI Garbage Classifier:** Built on **PyTorch MobileNetV2** using Transfer Learning to classify waste into Dry, Wet, Metal, and Paper streams.
